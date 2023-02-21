@@ -14,6 +14,7 @@ const App = () => {
 
   if (authorsQuery.loading || booksQuery.loading) return <div>Loading..</div>
 
+  console.log(authorsQuery.data)
   return (
     <>
       <div>

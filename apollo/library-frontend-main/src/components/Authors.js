@@ -4,7 +4,7 @@ import { ALL_AUTHORS, EDIT_BORN } from '../queries'
 
 const Authors = (props) => {
   const authors = props.authors
-  const [author, setAuthor] = useState('')
+  const [author, setAuthor] = useState(authors[0].name)
   const [birthyear, setBirthyear] = useState('')
   const [editAuthor] = useMutation(EDIT_BORN, {
     refetchQueries: [{ query: ALL_AUTHORS }],
@@ -49,14 +49,13 @@ const Authors = (props) => {
 
       <h2>Set birthyear</h2>
       <form onSubmit={submitBirthyear}>
-        <div>
-          <label htmlFor="author">name</label>
-          <input
-            type="text"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-          />
-        </div>
+        <select onChange={(e) => setAuthor(e.target.value)}>
+          {authors.map((e) => (
+            <option key={e.name} value={e.name}>
+              {e.name}
+            </option>
+          ))}
+        </select>
         <div>
           <label htmlFor="born">born</label>
           <input
