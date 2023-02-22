@@ -1,6 +1,22 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
+const { GraphQLError } = require('graphql')
 const { v1: uuid } = require('uuid')
+require('dotenv').config()
+
+const mongoose = require('mongoose')
+mongoose.set('strictQuery', false)
+
+const Author = require('./models/author')
+const Book = require('./models/book')
+const MONGODB_URI = process.env.MONGODB_URI
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB!'))
+  .catch((err) => {
+    console.log(err, err.message)
+  })
 
 let authors = [
   {
@@ -99,13 +115,13 @@ let books = [
 */
 
 const typeDefs = `
-  type Book {
-    title: String!
-    author: String!
-    published: Int!
-    genres: [String]!
-    id: ID!
-  }
+type Book {
+  title: String!
+  published: Int!
+  author: Author!
+  genres: [String!]!
+  id: ID!
+}
   type Author {
     name: String!
     born: Int
@@ -129,6 +145,7 @@ const typeDefs = `
       name: String!
       setBornTo: Int!
     ): Author
+    addAuthors: Int
   }
 `
 
@@ -157,14 +174,36 @@ const resolvers = {
     },
   },
   Mutation: {
-    addBook: (root, args) => {
-      const newBook = {
+    addBook: async (root, args) => {
+      const foundAuthor = await Author.findOne({ name: args.author })
+      console.log(args.author, foundAuthor)
+      const newBook = new Book({
         ...args,
-        id: uuid(),
+        author: foundAuthor._id,
+        /* id: uuid(), */
+      })
+      try {
+        await newBook.save()
+        console.log('Book saved: ', newBook)
+        books = books.concat(newBook)
+      } catch (err) {
+        throw new GraphQLError('Saving user failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.name,
+            err,
+          },
+        })
       }
-      books = books.concat(newBook)
+
       if (!authors.map((p) => p.name).includes(args.author)) {
-        authors = authors.concat({ name: args.author })
+        const newAuthor = new Author({ name: args.author })
+        try {
+          await newAuthor.save()
+          authors = authors.concat({ name: args.author })
+        } catch (err) {
+          console.log(err)
+        }
       }
       return newBook
     },
@@ -173,6 +212,13 @@ const resolvers = {
       if (!foundAuthor) return null
       foundAuthor.born = args.setBornTo
       return foundAuthor
+    },
+    addAuthors: async (root, args) => {
+      for (const el of authors) {
+        const authorToAdd = new Author({ ...el })
+        await authorToAdd.save()
+      }
+      return authors.length
     },
   },
 }
