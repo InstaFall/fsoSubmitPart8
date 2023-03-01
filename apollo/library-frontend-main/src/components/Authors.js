@@ -27,16 +27,19 @@ const Authors = (props) => {
   if (!props.show) {
     return null
   }
+
   return (
     <div>
       <h2>authors</h2>
       <table>
-        <tbody>
+        <thead>
           <tr>
             <th></th>
             <th>born</th>
             <th>books</th>
           </tr>
+        </thead>
+        <tbody>
           {authors.map((a) => (
             <tr key={a.name}>
               <td>{a.name}</td>
