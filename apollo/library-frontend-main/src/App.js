@@ -1,25 +1,34 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router'
 import { Link } from 'react-router-dom'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
-import { useMutation, useQuery } from '@apollo/client'
+import { useApolloClient, useMutation, useQuery } from '@apollo/client'
 import { ALL_AUTHORS, ALL_BOOKS, LOGIN } from './queries'
+import Login from './components/Login'
 
 const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState('')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const client = useApolloClient()
 
-  const [login, result] = useMutation(LOGIN)
   const authorsQuery = useQuery(ALL_AUTHORS)
   const booksQuery = useQuery(ALL_BOOKS)
+  useEffect(() => {
+    const sessionToken = localStorage.getItem('userToken')
+    if (sessionToken) {
+      setToken(sessionToken)
+    }
+  })
 
   if (authorsQuery.loading || booksQuery.loading) return <div>Loading..</div>
 
-  //console.log(authorsQuery.data)
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+  }
   return (
     <>
       <div>
@@ -32,6 +41,7 @@ const App = () => {
         <Link to="/newbook">
           <button onClick={() => setPage('add')}>add book</button>
         </Link>
+        {token && <button onClick={logout}>log out</button>}
       </div>
       <Routes>
         <Route path="/" element={<></>} />
@@ -51,6 +61,7 @@ const App = () => {
           }
         />
         <Route path="/newbook" element={<NewBook show={page === 'add'} />} />
+        <Route path="/login" element={<Login setToken={setToken} />} />
       </Routes>
     </>
   )

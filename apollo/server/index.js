@@ -137,6 +137,7 @@ type Book {
   }
   type Token {
     value: String!
+    username: String!
   }
   type Query {
     bookCount: Int!
@@ -200,7 +201,6 @@ const resolvers = {
       return booksByAuthor.filter((e) => e.author.name === root.name).length
     },
     born: (root) => {
-      console.log('RootObjesi: ', root)
       return root.born
     },
   },
@@ -309,7 +309,7 @@ const resolvers = {
         id: user._id,
       }
       const signed = jwt.sign(userForToken, process.env.JWT_SECRET)
-      return { value: signed }
+      return { value: signed, username: user.username }
     },
     createUser: async (root, args) => {
       const newUser = new User({

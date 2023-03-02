@@ -53,9 +53,10 @@ export const EDIT_BORN = gql`
 `
 
 export const LOGIN = gql`
-  mutation loginSite($username: String!, $password: String!) {
+  mutation login($username: String!, $password: String!) {
     login(username: $username, password: $password) {
       value
+      username
     }
   }
 `

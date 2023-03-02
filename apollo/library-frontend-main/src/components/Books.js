@@ -1,8 +1,9 @@
+import { Link } from 'react-router-dom'
+
 const Books = ({ books, show }) => {
   if (!show) {
     return null
   }
-  console.log(books)
 
   return (
     <div>

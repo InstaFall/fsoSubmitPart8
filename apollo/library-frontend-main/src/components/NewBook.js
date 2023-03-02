@@ -1,5 +1,6 @@
 import { useMutation } from '@apollo/client'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ALL_AUTHORS, ALL_BOOKS, CREATE_BOOK } from '../queries'
 
 const NewBook = (props) => {
@@ -22,6 +23,14 @@ const NewBook = (props) => {
 
   if (!props.show) {
     return null
+  }
+
+  if (!localStorage.getItem('userToken')) {
+    return (
+      <>
+        <Link to="/login">login</Link>
+      </>
+    )
   }
 
   const submit = async (event) => {
