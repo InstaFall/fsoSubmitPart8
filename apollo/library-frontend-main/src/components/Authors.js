@@ -1,5 +1,6 @@
 import { useMutation } from '@apollo/client'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ALL_AUTHORS, EDIT_BORN } from '../queries'
 
 const Authors = (props) => {
@@ -28,6 +29,29 @@ const Authors = (props) => {
     return null
   }
 
+  const EditAuthor = () => {
+    return (
+      <form onSubmit={submitBirthyear}>
+        <select onChange={(e) => setAuthor(e.target.value)}>
+          {authors.map((e) => (
+            <option key={e.name} value={e.name}>
+              {e.name}
+            </option>
+          ))}
+        </select>
+        <div>
+          <label htmlFor="born">born</label>
+          <input
+            type="text"
+            value={birthyear}
+            onChange={(e) => setBirthyear(e.target.value)}
+          />
+        </div>
+        <button type="submit">submit</button>
+      </form>
+    )
+  }
+
   return (
     <div>
       <h2>authors</h2>
@@ -51,24 +75,11 @@ const Authors = (props) => {
       </table>
 
       <h2>Set birthyear</h2>
-      <form onSubmit={submitBirthyear}>
-        <select onChange={(e) => setAuthor(e.target.value)}>
-          {authors.map((e) => (
-            <option key={e.name} value={e.name}>
-              {e.name}
-            </option>
-          ))}
-        </select>
-        <div>
-          <label htmlFor="born">born</label>
-          <input
-            type="text"
-            value={birthyear}
-            onChange={(e) => setBirthyear(e.target.value)}
-          />
-        </div>
-        <button type="submit">submit</button>
-      </form>
+      {localStorage.getItem('userToken') ? (
+        <EditAuthor />
+      ) : (
+        <Link to="/login">login</Link>
+      )}
     </div>
   )
 }
