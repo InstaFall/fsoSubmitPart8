@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { ALL_AUTHORS, ALL_BOOKS, CREATE_BOOK } from '../queries'
 
 const NewBook = (props) => {
@@ -20,15 +20,13 @@ const NewBook = (props) => {
       console.log(errors, messages)
     },
   })
-
-  if (!props.show) {
-    return null
-  }
-
+  const location = useLocation()
   if (!localStorage.getItem('userToken')) {
     return (
       <>
-        <Link to="/login">login</Link>
+        <Link to="/login" state={{ from: location }}>
+          login
+        </Link>
       </>
     )
   }

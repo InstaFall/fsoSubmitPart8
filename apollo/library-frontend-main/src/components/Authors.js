@@ -1,10 +1,9 @@
 import { useMutation } from '@apollo/client'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { ALL_AUTHORS, EDIT_BORN } from '../queries'
 
-const Authors = (props) => {
-  const authors = props.authors
+const EditAuthor = ({ authors }) => {
   const [author, setAuthor] = useState(authors[0].name)
   const [birthyear, setBirthyear] = useState('')
   const [editAuthor] = useMutation(EDIT_BORN, {
@@ -25,32 +24,31 @@ const Authors = (props) => {
     setBirthyear('')
   }
 
-  if (!props.show) {
-    return null
-  }
+  return (
+    <form onSubmit={submitBirthyear}>
+      <select onChange={(e) => setAuthor(e.target.value)}>
+        {authors.map((e) => (
+          <option key={e.name} value={e.name}>
+            {e.name}
+          </option>
+        ))}
+      </select>
+      <div>
+        <label htmlFor="born">born</label>
+        <input
+          type="text"
+          value={birthyear}
+          onChange={(e) => setBirthyear(e.target.value)}
+        />
+      </div>
+      <button type="submit">submit</button>
+    </form>
+  )
+}
 
-  const EditAuthor = () => {
-    return (
-      <form onSubmit={submitBirthyear}>
-        <select onChange={(e) => setAuthor(e.target.value)}>
-          {authors.map((e) => (
-            <option key={e.name} value={e.name}>
-              {e.name}
-            </option>
-          ))}
-        </select>
-        <div>
-          <label htmlFor="born">born</label>
-          <input
-            type="text"
-            value={birthyear}
-            onChange={(e) => setBirthyear(e.target.value)}
-          />
-        </div>
-        <button type="submit">submit</button>
-      </form>
-    )
-  }
+const Authors = (props) => {
+  const authors = props.authors
+  const location = useLocation()
 
   return (
     <div>
@@ -76,9 +74,11 @@ const Authors = (props) => {
 
       <h2>Set birthyear</h2>
       {localStorage.getItem('userToken') ? (
-        <EditAuthor />
+        <EditAuthor authors={authors} />
       ) : (
-        <Link to="/login">login</Link>
+        <Link to="/login" state={{ from: location }}>
+          login
+        </Link>
       )}
     </div>
   )
