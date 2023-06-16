@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { BOOKS_BY_GENRE } from '../queries'
+import { useLazyQuery } from '@apollo/client'
 
 const Books = ({ books }) => {
   const [filter, setFilter] = useState('')
-
+  const [callBooksByGenre, booksByGenre] = useLazyQuery(BOOKS_BY_GENRE)
   const bookGenres = books.map((el) => el.genres)
   const genres = []
   bookGenres.forEach((el) => {
@@ -12,10 +14,16 @@ const Books = ({ books }) => {
       }
     }
   })
-
-  const booksToList = filter
+  // Filter with React
+  /* const booksToList = filter
     ? books.filter((el) => el.genres.includes(filter))
-    : books
+    : books */
+
+  // Filter with GraphQL Query: BOOKS_BY_GENRE
+  useEffect(() => {
+    callBooksByGenre({ variables: { genre: filter } })
+  }, [filter])
+
   return (
     <div>
       <h2>books</h2>
@@ -37,7 +45,7 @@ const Books = ({ books }) => {
           </tr>
         </thead>
         <tbody>
-          {booksToList.map((a) => (
+          {booksByGenre?.data?.allBooks.map((a) => (
             <tr key={a.title}>
               <td>{a.title}</td>
               <td>{a.author.name}</td>
