@@ -1,7 +1,7 @@
-import { useMutation } from '@apollo/client'
+import { useApolloClient, useMutation } from '@apollo/client'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ALL_AUTHORS, ALL_BOOKS, CREATE_BOOK } from '../queries'
+import { ALL_AUTHORS, ALL_BOOKS, BOOKS_BY_GENRE, CREATE_BOOK } from '../queries'
 
 const NewBook = (props) => {
   const [title, setTitle] = useState('')
@@ -9,15 +9,25 @@ const NewBook = (props) => {
   const [published, setPublished] = useState('')
   const [genre, setGenre] = useState('')
   const [genres, setGenres] = useState([])
+  const client = useApolloClient()
 
   const [addBook] = useMutation(CREATE_BOOK, {
-    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
+    refetchQueries: [
+      { query: ALL_BOOKS },
+      { query: ALL_AUTHORS },
+      { query: BOOKS_BY_GENRE, variables: { genre } },
+    ],
     awaitRefetchQueries: true,
     onError: (error) => {
-      console.log(error.graphQLErrors[0])
-      const errors = error.graphQLErrors[0]
-      const messages = Object.values(errors).join('\n')
-      console.log(errors, messages)
+      const { graphQLErrors, networkError } = error
+      if (networkError) console.log(networkError.result)
+      if (graphQLErrors) console.log(graphQLErrors)
+      if (graphQLErrors)
+        graphQLErrors.forEach(({ message, locations, path }) =>
+          console.log(
+            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+          )
+        )
     },
   })
   const location = useLocation()
@@ -37,6 +47,7 @@ const NewBook = (props) => {
     addBook({
       variables: { title, author, published: parseInt(published), genres },
     })
+    client.resetStore()
     setTitle('')
     setPublished('')
     setAuthor('')

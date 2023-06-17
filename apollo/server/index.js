@@ -20,7 +20,7 @@ mongoose
     console.log(err, err.message)
   })
 
-let authors = [
+/* let authors = [
   {
     name: 'Robert Martin',
     id: 'afa51ab0-344d-11e9-a414-719c6709cf3e',
@@ -44,7 +44,7 @@ let authors = [
     name: 'Sandi Metz', // birthyear not known
     id: 'afa5b6f3-344d-11e9-a414-719c6709cf3e',
   },
-]
+] */
 
 /*
  * Suomi:
@@ -60,7 +60,7 @@ let authors = [
  * Sin embargo, por simplicidad, almacenaremos el nombre del autor en conección con el libro
  */
 
-let books = [
+/* let books = [
   {
     title: 'Clean Code',
     published: 2008,
@@ -110,7 +110,7 @@ let books = [
     id: 'afa5de04-344d-11e9-a414-719c6709cf3e',
     genres: ['classic', 'revolution'],
   },
-]
+] */
 
 /*
   you can remove the placeholder query once your first own has been implemented 
@@ -123,7 +123,7 @@ type Book {
   author: Author!
   genres: [String!]!
   id: ID!
-}
+  }
   type Author {
     name: String!
     born: Int
@@ -197,11 +197,13 @@ const resolvers = {
   },
   Author: {
     bookCount: async (root) => {
-      const booksByAuthor = await Book.find({}).populate('author', { name: 1 })
-      return booksByAuthor.filter((e) => e.author.name === root.name).length
-    },
-    born: (root) => {
-      return root.born
+      const allBooks = await Book.find({}).populate('author', { name: 1 })
+
+      console.log(allBooks)
+      //console.log(allBooks.filter((el) => el.title === 'MyBook'))
+      //console.log(allBooks.filter((el) => el.author.name === 'Robert Martin'))
+
+      return allBooks.filter((e) => e.author.name === root.name).length
     },
   },
   Mutation: {
@@ -235,7 +237,6 @@ const resolvers = {
         const newAuthor = new Author({ name: args.author })
         try {
           await newAuthor.save()
-          authors = authors.concat({ name: args.author })
         } catch (err) {
           console.log(err)
         }
@@ -249,8 +250,6 @@ const resolvers = {
       })
       try {
         await newBook.save()
-        console.log('Book saved: ', newBook)
-        books = books.concat(newBook)
       } catch (err) {
         throw new GraphQLError('Saving user failed', {
           extensions: {
@@ -279,21 +278,21 @@ const resolvers = {
       console.log('result: ', result)
       return result
     },
-    addAuthors: async (root, args) => {
+    /* addAuthors: async (root, args) => {
       for (const el of authors) {
         const authorToAdd = new Author({ ...el })
         await authorToAdd.save()
       }
       return authors.length
-    },
-    addBooks: async (root, args) => {
+    }, */
+    /* addBooks: async (root, args) => {
       for (const el of books) {
         const authorOfBook = await Author.findOne({ name: el.author })
         const bookToAdd = new Book({ ...el, author: authorOfBook._id })
         await bookToAdd.save()
       }
       return books.length
-    },
+    }, */
     login: async (root, args) => {
       const user = await User.findOne({ username: args.username })
       if (!user || args.password !== 'uncrackable') {
